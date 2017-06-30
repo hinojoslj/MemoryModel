@@ -1,34 +1,37 @@
 ﻿using UnityEngine;
+using System;
+using System.Linq;
 using System.Collections.Generic;
 
 public class MemoryMaker : MonoBehaviour {
-	public string user; //who is the user that this memory belongs to
-	public string memName;
-	public string[] who; //who else was there
-	public string time; //when the interrogative statement was made (game, scene, eventID)
-	public string requester; //who made the interrogative statement
-	public string statement; //the interrogative statement
+	public string user; 	//who is the user that this memory belongs to
+	private int memName; 	//the name of the memory
+	public string[] who;	//who else was there
+	public string time; 	//when the interrogative statement was made (game, scene, eventID)
+	public string requester;//who made the interrogative statement
+	public string statement;//the interrogative statement
 	public string response; //the user's response
-	public string[] whom; //who the information is about
+	public string[] whom; 	//who the information is about
 	public List<Memory> memList = new List<Memory>();
 	private GameObject memoryList;
 	//might change this soon (next line)
 	private Memory mem; 
 
+	private int mNameCount = 0;
+	private bool fileExistCheck = false;
+
 	// Use this for initialization
 	void Start () {
 		memoryList = GameObject.Find ("MemoryList");
-		//might change this soon (next line)
-		//createMemory(memName, who, time, requester, statement, response, whom);
 		if (System.IO.File.Exists (@"C:\Users\hinoj_000\Documents\UTEP\ISG\Summer Project\Memory Model\File Memories\" + user + ".txt")) {
 			Debug.Log ("File Exists! Updating file..");
 			updateFile ();
-			grabMemories ();
 		} else {
+			createMemory(user, who, time, requester, statement, response, whom); 
 			Debug.Log ("File does not exist! Creating file..");
 			createFile ();
-			grabMemories ();
 		}
+		grabMemories ();
 	}
 
 	// Update is called once per frame
@@ -37,8 +40,9 @@ public class MemoryMaker : MonoBehaviour {
 	}
 
 	//This will create a type object Memory by grabbing the values from Unity.
-	public void createMemory(string chosenName, string[] chosenWho, string chosenTime, string chosenRequester, string chosenStatement, string chosenResponse, string[] chosenWhom){
-		mem = new Memory(chosenName, chosenWho, chosenTime, chosenRequester, chosenStatement, chosenResponse, chosenWhom);
+	public void createMemory(string chosenUser, string[] chosenWho, string chosenTime, string chosenRequester, string chosenStatement, string chosenResponse, string[] chosenWhom){
+		int chosenMemName = createMemName ();
+		mem = new Memory (chosenUser, chosenMemName, chosenWho, chosenTime, chosenRequester, chosenStatement, chosenResponse, chosenWhom);
 		Debug.Log("Memory was created!");
 		memList.Add (mem);
 	}
@@ -47,17 +51,13 @@ public class MemoryMaker : MonoBehaviour {
 	public void createFile(){
 
 		using (System.IO.StreamWriter file = 
-			new System.IO.StreamWriter(@"C:\Users\hinoj_000\Documents\UTEP\ISG\Summer Project\Memory Model\File Memories\" + user + ".txt"))
-		{
-			//file.Write ("Memory Name:");
-			if(mem.getMemName() != ""){
-				file.WriteLine(mem.getMemName());
-			}else{
-				//Ideally, this should never happen. 
-				//If memoryName is null, have it fix it. 
-				mem.setMemName("Memory1");
-				file.WriteLine(mem.getMemName());
-			}
+			new System.IO.StreamWriter(@"C:\Users\hinoj_000\Documents\UTEP\ISG\Summer Project\Memory Model\File Memories\" + user + ".txt")){
+
+			//file.WriteLine ("User: ");
+			file.WriteLine (mem.getUser());
+
+			file.WriteLine("Memory");
+			file.WriteLine(mem.getMemName());
 
 			//file.Write ("Who: ");
 			string[] temp = mem.getWho();
@@ -137,44 +137,23 @@ public class MemoryMaker : MonoBehaviour {
 		while ((line = file.ReadLine ()) != null) {
 			if (line.Contains ("USER")) {
 				//DO NOTHING
-			} else if(line.Contains("Memory")){
+			} else if (line.Contains ("Memory")) {
 				count = 1;
-				//Put string into name
-				memName = line;
-				//memoryList.AddComponent<Memory>().GetComponent<Memory>().setMemName(memName);
-
-				//memoryList.GetComponent<Memory> ().setMemName (memName);
-				Debug.Log ("Line: " + line + " " + count);
 			} else if (count == 2) {
-				who = line.Split (' ');
-
-				//memoryList.GetComponent<Memory> ().setWho (who);
-				Debug.Log ("Line: " + line + " " + count);
+				memName = Convert.ToInt32 (line);
 			} else if (count == 3) {
-				//put string into whom
-				time = line;
-				//memoryList.GetComponent<Memory> ().setTime (time);
-				Debug.Log ("Line: " + line + " " + count);
+				who = line.Split (' ');
 			} else if (count == 4) {
-				//put string into statement
-				requester = line;
-				//memoryList.GetComponent<Memory> ().setRequester (requester);
-				Debug.Log ("Line: " + line + " " + count);
+				time = line;
 			} else if (count == 5) {
-				statement = line;
-				//memoryList.GetComponent<Memory> ().setStatement (statement);
-				Debug.Log ("Line: " + line + " " + count);
+				requester = line;
 			} else if (count == 6) {
-				//put string into yadayada
+				statement = line;
+			} else if (count == 7) {
 				response = line;
-				//memoryList.GetComponent<Memory> ().setResponse (response);
-				Debug.Log ("Line: " + line + " " + count);
-			} else if(count == 7) {
-				//whom = line;
+			} else if(count == 8) {
 				whom = line.Split (' ');
-				//memoryList.GetComponent<Memory> ().setWhom (whom);
-				Debug.Log ("Line: " + line + " " + count);
-				createMemory(memName, who, time, requester, statement, response, whom);
+				createMemory(user, who, time, requester, statement, response, whom);
 			}
 			else if(line == null){
 				Debug.Log ("Warning: Null encountered! Cross check txt file and memories..");
@@ -183,6 +162,7 @@ public class MemoryMaker : MonoBehaviour {
 				count = 0;
 				Debug.Log("Count updated: " + count);
 			}
+			Debug.Log ("Line: " + line + " " + count);
 			count++;
 		}
 
@@ -211,5 +191,16 @@ public class MemoryMaker : MonoBehaviour {
 			j++;
 		} 
 
+	}
+
+	public int createMemName() {
+		if (fileExistCheck == false) {
+			if (System.IO.File.Exists (@"C:\Users\hinoj_000\Documents\UTEP\ISG\Summer Project\Memory Model\File Memories\" + user + ".txt")) {
+				Debug.Log ("File Exists! Updating file..");
+				mNameCount = memList.Count;
+				fileExistCheck = true;
+				}
+		}
+		return ++mNameCount;
 	}
 }

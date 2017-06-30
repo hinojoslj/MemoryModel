@@ -4,18 +4,20 @@ using System.Collections.Generic;
 
 public class Memory : MonoBehaviour{
     /* The Memory knows are the who, whom, when, requester, response, and statement */
-    public string memName; //name of the memory
-    public string[] who; //who else was there
-    public string time; //when the interrogative statement was made (game, scene, eventID)
-    public string requester; //who made the interrogative statement
-    public string statement; //the interrogative statement
-    public string response; //the user's response
-    public string[] whom; //who the information is about
+	public string user; 	//who is the user that this memory belongs to
+    public int memName; 	//name of the memory
+    public string[] who; 	//who else was there 
+    public string time; 	//when the interrogative statement was made (game, scene, eventID)
+    public string requester;//who made the interrogative statement
+    public string statement;//the interrogative statement
+    public string response;	//the user's response
+    public string[] whom; 	//who the information is about
 
     /* Constructor: Memory has other Agent(s)/User(s) we know of */
-	public Memory(string n, string[] w, string t, string req, string s, string res, string[] m) 
+	public Memory(string u, int n, string[] w, string t, string req, string s, string res, string[] m) 
 	{
 	    memName = n;
+		user = u;
         who = w;
         time = t;
         requester = req;
@@ -23,9 +25,25 @@ public class Memory : MonoBehaviour{
         response = res;
         whom = m;
     }
+
+	public Memory(string u, string[] w, string t, string req, string s, string res, string[]m)
+	{
+		user = u; 
+		who = w;
+		time = t;
+		requester = req;
+		statement = s;
+		response = res;
+		whom = m;
+	}
     
     //Setters
-    public void setMemName(string chosenMemName)
+	public void setUser(string chosenUser)
+	{
+		user = chosenUser;	
+	}
+
+    public void setMemName(int chosenMemName)
     {
         memName = chosenMemName;
     }
@@ -61,7 +79,11 @@ public class Memory : MonoBehaviour{
 	}
 
     //Getters
-    public string getMemName()
+	public string getUser()
+	{
+		return user; 
+	}
+    public int getMemName()
     {
         return memName;    
     }
@@ -105,7 +127,7 @@ public class Memory : MonoBehaviour{
 	public void printMemory() 
 	{
 	    string tempPrint;
-	    tempPrint = "\nMEMNAME: " + testString(memName);
+	    tempPrint = "\nMEMNAME: " + memName;
 	    tempPrint += "\nWHO: " + testStringArray(who);
 	    tempPrint += "\nTIME: " + testString(time);
 	    tempPrint += "\nREQUESTER: " + testString(requester);
@@ -137,8 +159,4 @@ public class Memory : MonoBehaviour{
         }
         return "string is empty";
     }
-	
-
-    /* Getters and Setters for this instance of Memory */
-    //FIXME: y'all can implement these
 }
