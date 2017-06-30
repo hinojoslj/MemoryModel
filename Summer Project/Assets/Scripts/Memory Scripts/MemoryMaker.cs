@@ -196,7 +196,6 @@ public class MemoryMaker : MonoBehaviour {
 		for (int i = 0; i < listSize; i++) {
 			memoryList.AddComponent<Memory> ();
 		}
-			
 
 		Memory[] memArray = memoryList.GetComponents<Memory> ();
 		int j = 0;
